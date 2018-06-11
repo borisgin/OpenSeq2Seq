@@ -12,15 +12,15 @@ base_model = Speech2Text
 base_params = {
   "random_seed": 0,
   "use_horovod": False,
-  "num_epochs": 100,
+  "num_epochs": 200,
 
-  "num_gpus": 2,
-  "batch_size_per_gpu": 2,
+  "num_gpus": 1,
+  "batch_size_per_gpu": 10,
 
   "save_summaries_steps": 10,
   "print_loss_steps": 10,
   "print_samples_steps": 20,
-  "eval_steps": 50,
+  "eval_steps": 20,
   "save_checkpoint_steps": 50,
   "logdir": "tmp_log_folder",
 
@@ -59,12 +59,12 @@ base_params = {
     "n_hidden": 256,
 
     "rnn_cell_dim": 256,
-    "rnn_type": "gru",
+    "rnn_type": "sn_rnn", # "bn_rnn", #"gru",
     "num_rnn_layers": 1,
     "rnn_unidirectional": False,
     "row_conv": False,
     "row_conv_width": 8,
-    "use_cudnn_rnn": True,
+    "use_cudnn_rnn": False, #True,
 
     "dropout_keep_prob": 1.0,
 
@@ -111,6 +111,7 @@ train_params = {
 
 eval_params = {
   "data_layer": Speech2TextDataLayer,
+  "batch_size_per_gpu": 10,
   "data_layer_params": {
     "num_audio_features": 160,
     "input_type": "spectrogram",

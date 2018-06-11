@@ -90,6 +90,10 @@ def train(train_model, eval_model=None, debug_port=None):
     local_init_op=tf.group(tf.local_variables_initializer(), init_data_layer)
   )
 
+  vars = tf.global_variables()
+  for var in vars:
+    print(var.name)
+
   # starting training
   with tf.train.MonitoredTrainingSession(
     scaffold=scaffold,

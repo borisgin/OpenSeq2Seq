@@ -8,6 +8,7 @@ from tensorflow.contrib.cudnn_rnn.python.ops import cudnn_rnn_ops
 
 from .encoder import Encoder
 
+from open_seq2seq.parts.rnns import bn_rnn, custom_rnn
 
 def conv2d_bn_actv(name, inputs, filters, kernel_size, activation_fn, strides,
                    padding, regularizer, training, data_format, bn_momentum,
@@ -36,8 +37,9 @@ def conv2d_bn_actv(name, inputs, filters, kernel_size, activation_fn, strides,
   output = activation_fn(bn)
   return output
 
+#------------------------------------------------------------------------------
 
-def rnn_cell(rnn_cell_dim, layer_type, dropout_keep_prob=1.0):
+def rnn_cell(rnn_cell_dim, layer_type, dropout_keep_prob=1.0, training=False):
   """Helper function that creates RNN cell."""
   if layer_type == "layernorm_lstm":
     cell = tf.contrib.rnn.LayerNormBasicLSTMCell(
@@ -51,6 +53,10 @@ def rnn_cell(rnn_cell_dim, layer_type, dropout_keep_prob=1.0):
       cell = tf.contrib.cudnn_rnn.CudnnCompatibleGRUCell(rnn_cell_dim)
     elif layer_type == "cudnn_lstm":
       cell = tf.contrib.cudnn_rnn.CudnnCompatibleLSTMCell(rnn_cell_dim)
+    elif layer_type == "bn_rnn":
+        cell = bn_rnn.BatchNormRNNCell(num_units=rnn_cell_dim, training=training)
+    elif layer_type == "sn_rnn":
+        cell = bn_rnn.SeqNormRNNCell(num_units=rnn_cell_dim, training=training)
     else:
       raise ValueError("Error: not supported rnn type:{}".format(layer_type))
 
@@ -58,7 +64,85 @@ def rnn_cell(rnn_cell_dim, layer_type, dropout_keep_prob=1.0):
       cell, output_keep_prob=dropout_keep_prob)
   return cell
 
+#----------------------------------------------------------
+def rnn_module(inputs,
+               src_length,
+               num_rnn_layers,
+               rnn_cell_dim,
+               rnn_type="cudnn_gru",
+               direction=cudnn_rnn_ops.CUDNN_RNN_BIDIRECTION,
+               use_cudnn=True,
+               dropout_keep_prob=1.0,
+               batch_size=None,
+               training=False
+               ):
+  if use_cudnn:
+    # reshape to [B, T, C] --> [T, B, C]
+    rnn_input = tf.transpose(inputs, [1, 0, 2])
+    if rnn_type == "cudnn_gru" or rnn_type == "gru":
+      rnn_block = tf.contrib.cudnn_rnn.CudnnGRU(
+        num_layers=num_rnn_layers,
+        num_units=rnn_cell_dim,
+        direction=direction,
+        dropout=1.0 - dropout_keep_prob,
+        dtype=rnn_input.dtype,
+        name="cudnn_gru",
+      )
+    elif rnn_type == "cudnn_lstm" or rnn_type == "lstm":
+      rnn_block = tf.contrib.cudnn_rnn.CudnnLSTM(
+        num_layers=num_rnn_layers,
+        num_units=rnn_cell_dim,
+        direction=direction,
+        dropout=1.0 - dropout_keep_prob,
+        dtype=rnn_input.dtype,
+        name="cudnn_lstm",
+      )
+    else:
+      raise ValueError(
+        "{} is not a valid cudnn rnn_type".format(rnn_type)
+      )
+    rnn_output, state = rnn_block(rnn_input)
+    outputs = tf.transpose(rnn_output, [1, 0, 2])
 
+  else:
+    rnn_input = inputs
+    print("inputs:", inputs.shape)
+    multirnn_cell_fw = tf.nn.rnn_cell.MultiRNNCell(
+      [rnn_cell(rnn_cell_dim=rnn_cell_dim, layer_type=rnn_type,
+                dropout_keep_prob=dropout_keep_prob,
+                training=training
+                )
+       for _ in range(num_rnn_layers)]
+    )
+    if direction==cudnn_rnn_ops.CUDNN_RNN_UNIDIRECTION:
+      outputs, state = tf.nn.dynamic_rnn(
+        cell=multirnn_cell_fw,
+        inputs=rnn_input,
+        sequence_length=src_length,
+        dtype=rnn_input.dtype,
+        time_major=False,
+      )
+    else:
+      multirnn_cell_bw = tf.nn.rnn_cell.MultiRNNCell(
+        [rnn_cell(rnn_cell_dim=rnn_cell_dim, layer_type=rnn_type,
+                  dropout_keep_prob=dropout_keep_prob,
+                  training=training)
+         for _ in range(num_rnn_layers)]
+      )
+      rnn_output, state = tf.nn.bidirectional_dynamic_rnn(
+        cell_fw=multirnn_cell_fw,
+        cell_bw=multirnn_cell_bw,
+        inputs=rnn_input,
+        sequence_length=src_length,
+        dtype=rnn_input.dtype,
+        time_major=False
+      )
+      # concat 2 tensors [B, T, n_cell_dim] --> [B, T, 2*n_cell_dim]
+      outputs = tf.concat(rnn_output, 2)
+
+  return outputs
+
+#-----------------------------------------------------------------------
 def row_conv(name, input_layer, batch, channels, width, activation_fn,
              regularizer, training, data_format, bn_momentum, bn_epsilon):
   """Helper function that applies "row" or "in plane" convolution."""
@@ -106,6 +190,7 @@ def row_conv(name, input_layer, batch, channels, width, activation_fn,
     output = tf.cast(output, tf.float16)
   return output
 
+#==================================================================
 
 class DeepSpeech2Encoder(Encoder):
   """DeepSpeech-2 like encoder."""
@@ -120,7 +205,7 @@ class DeepSpeech2Encoder(Encoder):
       'n_hidden': int,
       'use_cudnn_rnn': bool,
       'rnn_cell_dim': int,
-      'rnn_type': ['layernorm_lstm', 'lstm', 'gru', 'cudnn_gru', 'cudnn_lstm'],
+      'rnn_type': ['layernorm_lstm', 'lstm', 'gru', 'cudnn_gru', 'cudnn_lstm','bn_rnn','sn_rnn'],
       'rnn_unidirectional': bool,
     })
 
@@ -194,7 +279,7 @@ class DeepSpeech2Encoder(Encoder):
     dropout_keep_prob = self.params['dropout_keep_prob'] if training else 1.0
     regularizer = self.params.get('regularizer', None)
     data_format = self.params.get('data_format', 'channels_last')
-    bn_momentum = self.params.get('bn_momentum', 0.99)
+    bn_momentum = self.params.get('bn_momentum', 0.1)
     bn_epsilon = self.params.get('bn_epsilon', 1e-3)
 
     input_layer = tf.expand_dims(source_sequence, axis=-1)
@@ -246,68 +331,23 @@ class DeepSpeech2Encoder(Encoder):
     if num_rnn_layers > 0:
       rnn_cell_dim = self.params['rnn_cell_dim']
       rnn_type = self.params['rnn_type']
-      if self.params['use_cudnn_rnn']:
-        # reshape to [B, T, C] --> [T, B, C]
-        rnn_input = tf.transpose(top_layer, [1, 0, 2])
-        if self.params['rnn_unidirectional']:
-          direction = cudnn_rnn_ops.CUDNN_RNN_UNIDIRECTION
-        else:
-          direction = cudnn_rnn_ops.CUDNN_RNN_BIDIRECTION
-
-        if rnn_type == "cudnn_gru" or rnn_type == "gru":
-          rnn_block = tf.contrib.cudnn_rnn.CudnnGRU(
-            num_layers=num_rnn_layers,
-            num_units=rnn_cell_dim,
-            direction=direction,
-            dropout=1.0 - dropout_keep_prob,
-            dtype=rnn_input.dtype,
-            name="cudnn_gru",
-          )
-        elif rnn_type == "cudnn_lstm" or rnn_type == "lstm":
-          rnn_block = tf.contrib.cudnn_rnn.CudnnLSTM(
-            num_layers=num_rnn_layers,
-            num_units=rnn_cell_dim,
-            direction=direction,
-            dropout=1.0 - dropout_keep_prob,
-            dtype=rnn_input.dtype,
-            name="cudnn_lstm",
-          )
-        else:
-          raise ValueError(
-            "{} is not a valid rnn_type for cudnn_rnn layers".format(rnn_type)
-          )
-        top_layer, state = rnn_block(rnn_input)
-        top_layer = tf.transpose(top_layer, [1, 0, 2])
+      if self.params['rnn_unidirectional']:
+        direction = cudnn_rnn_ops.CUDNN_RNN_UNIDIRECTION
       else:
-        rnn_input = top_layer
-        multirnn_cell_fw = tf.nn.rnn_cell.MultiRNNCell(
-          [rnn_cell(rnn_cell_dim=rnn_cell_dim, layer_type=rnn_type,
-                    dropout_keep_prob=dropout_keep_prob)
-           for _ in range(num_rnn_layers)]
-        )
-        if self.params['rnn_unidirectional']:
-          top_layer, state = tf.nn.dynamic_rnn(
-            cell=multirnn_cell_fw,
-            inputs=rnn_input,
-            sequence_length=src_length,
-            dtype=rnn_input.dtype,
-            time_major=False,
-          )
-        else:
-          multirnn_cell_bw = tf.nn.rnn_cell.MultiRNNCell(
-            [rnn_cell(rnn_cell_dim=rnn_cell_dim, layer_type=rnn_type,
-                      dropout_keep_prob=dropout_keep_prob)
-             for _ in range(num_rnn_layers)]
-          )
-          top_layer, state = tf.nn.bidirectional_dynamic_rnn(
-            cell_fw=multirnn_cell_fw, cell_bw=multirnn_cell_bw,
-            inputs=rnn_input,
-            sequence_length=src_length,
-            dtype=rnn_input.dtype,
-            time_major=False
-          )
-          # concat 2 tensors [B, T, n_cell_dim] --> [B, T, 2*n_cell_dim]
-          top_layer = tf.concat(top_layer, 2)
+        direction = cudnn_rnn_ops.CUDNN_RNN_BIDIRECTION
+      use_cudnn=self.params['use_cudnn_rnn']
+
+      top_layer = rnn_module(inputs=top_layer,
+                     src_length=src_length,
+                     num_rnn_layers=num_rnn_layers,
+                     rnn_cell_dim=rnn_cell_dim,
+                     rnn_type=rnn_type,
+                     direction=direction,
+                     use_cudnn=use_cudnn,
+                     dropout_keep_prob=dropout_keep_prob,
+                     batch_size=batch_size,
+                     training=training
+                     )
     # -- end of rnn------------------------------------------------------------
 
     if self.params['row_conv']:
