@@ -26,6 +26,7 @@ class Wave2LetterEncoder(Encoder):
         'normalization': [None, 'batch_norm'],
         'bn_momentum': float,
         'bn_epsilon': float,
+        'residual': bool,
     })
 
   def __init__(self, params, model, name="w2l_encoder", mode='train'):
@@ -99,6 +100,7 @@ class Wave2LetterEncoder(Encoder):
     regularizer = self.params.get('regularizer', None)
     data_format = self.params.get('data_format', 'channels_last')
     normalization = self.params.get('normalization', 'batch_norm')
+    residual = self.params.get('residual', False)
 
     normalization_params = {}
     if normalization is None:
@@ -130,7 +132,27 @@ class Wave2LetterEncoder(Encoder):
       dropout_keep = convnet_layers[idx_convnet].get(
           'dropout_keep_prob', dropout_keep_prob) if training else 1.0
 
+      if residual and (layer_repeat>1):
+        res_out = conv_block(
+          layer_type=layer_type,
+          name="res{}".format(idx_convnet + 1),
+          inputs=conv_feats,
+          filters=ch_out,
+          kernel_size=1,
+          activation_fn=None, #self.params['activation_fn'],
+          strides=strides,
+          padding=padding,
+          regularizer=regularizer,
+          training=training,
+          data_format=data_format,
+          **normalization_params
+        )
       for idx_layer in range(layer_repeat):
+        if residual and (layer_repeat>1) and (idx_layer==layer_repeat):
+          activation_fn=None
+        else:
+          activation_fn=self.params['activation_fn']
+
         conv_feats = conv_block(
             layer_type=layer_type,
             name="conv{}{}".format(
@@ -138,7 +160,7 @@ class Wave2LetterEncoder(Encoder):
             inputs=conv_feats,
             filters=ch_out,
             kernel_size=kernel_size,
-            activation_fn=self.params['activation_fn'],
+            activation_fn=activation_fn, #self.params['activation_fn'],
             strides=strides,
             padding=padding,
             regularizer=regularizer,
@@ -147,6 +169,11 @@ class Wave2LetterEncoder(Encoder):
             **normalization_params
         )
         conv_feats = tf.nn.dropout(x=conv_feats, keep_prob=dropout_keep)
+
+      if residual and (layer_repeat>1):
+        conv_feats= tf.add(conv_feats, res_out)
+        if self.params['activation_fn']!=None:
+          conv_feats = self.params['activation_fn'](conv_feats)
 
     outputs = conv_feats
 
