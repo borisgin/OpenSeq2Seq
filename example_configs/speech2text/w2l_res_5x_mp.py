@@ -12,12 +12,12 @@ base_model = Speech2Text
 
 base_params = {
     "random_seed": 0,
-    "use_horovod": True,
+    "use_horovod": False,
     #"max_steps" : 50,
     "num_epochs": 100, #50,
 
-    "num_gpus": 8,
-    "batch_size_per_gpu": 64,
+    "num_gpus": 1,
+    "batch_size_per_gpu": 32,
     "iter_size": 1,
 
     "save_summaries_steps": 1100,
@@ -54,27 +54,27 @@ base_params = {
     "encoder_params": {
         "convnet_layers": [
             {
-                "type": "conv1d", "repeat": 3,
+                "type": "conv1d", "repeat": 5,
                 "kernel_size": [11], "stride": [1],
                 "num_channels": 256, "padding": "SAME",
             },
             {
-                "type": "conv1d", "repeat": 3,
+                "type": "conv1d", "repeat": 5,
                 "kernel_size": [13], "stride": [1],
                 "num_channels": 384, "padding": "SAME",
             },
             {
-                "type": "conv1d", "repeat": 3,
+                "type": "conv1d", "repeat": 5,
                 "kernel_size": [17], "stride": [1],
                 "num_channels": 512, "padding": "SAME",
             },
             {
-                "type": "conv1d", "repeat": 3,
+                "type": "conv1d", "repeat": 5,
                 "kernel_size": [21], "stride": [1],
                 "num_channels": 640, "padding": "SAME",
             },
             {
-                "type": "conv1d", "repeat": 3,
+                "type": "conv1d", "repeat": 5,
                 "kernel_size": [25], "stride": [1],
                 "num_channels": 768, "padding": "SAME",
             },
@@ -128,16 +128,16 @@ train_params = {
         "num_audio_features": 64,
         "input_type": "logfbank",
         "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
-        # "dataset_files": [
-        #     "/raid/speech/librispeech/librivox-train-clean-100.csv",
-        #     "/raid/speech/librispeech/librivox-train-clean-360.csv",
-        #     "/raid/speech/librispeech/librivox-train-other-500.csv",
-        # ],
         "dataset_files": [
-            "data/librispeech/librivox-train-clean-100.csv",
-            "data/librispeech/librivox-train-clean-360.csv",
-            "data/librispeech/librivox-train-other-500.csv",
+            "/raid/speech/librispeech/librivox-train-clean-100.csv",
+            "/raid/speech/librispeech/librivox-train-clean-360.csv",
+            "/raid/speech/librispeech/librivox-train-other-500.csv",
         ],
+        # "dataset_files": [
+        #     "data/librispeech/librivox-train-clean-100.csv",
+        #     "data/librispeech/librivox-train-clean-360.csv",
+        #     "data/librispeech/librivox-train-other-500.csv",
+        # ],
         "max_duration": 16.7,
         "shuffle": True,
     },
@@ -149,12 +149,12 @@ eval_params = {
         "num_audio_features": 64,
         "input_type": "logfbank",
         "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
-        # "dataset_files": [
-        #     "/raid/speech/librispeech/librivox-dev-clean.csv",
-        # ],
         "dataset_files": [
-            "data/librispeech/librivox-dev-clean.csv",
+            "/raid/speech/librispeech/librivox-dev-clean.csv",
         ],
+        # "dataset_files": [
+        #     "data/librispeech/librivox-dev-clean.csv",
+        # ],
         "shuffle": False,
     },
 }
@@ -165,12 +165,12 @@ infer_params = {
         "num_audio_features": 64,
         "input_type": "logfbank",
         "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
-        # "dataset_files": [
-        #     "/raid/speech/librispeech/librivox-test-clean.csv",
-        # ],
         "dataset_files": [
-            "data/librispeech/librivox-test-clean.csv",
+            "/raid/speech/librispeech/librivox-test-clean.csv",
         ],
+        # "dataset_files": [
+        #     "data/librispeech/librivox-test-clean.csv",
+        # ],
         "shuffle": False,
     },
 }
