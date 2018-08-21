@@ -153,7 +153,8 @@ class Wave2LetterEncoder(Encoder):
           activation_fn=None
         else:
           activation_fn=self.params['activation_fn']
-          conv_feats = conv_block(
+
+        conv_feats = conv_block(
             layer_type=layer_type,
             name="conv{}{}".format(
                 idx_convnet + 1, idx_layer + 1),
