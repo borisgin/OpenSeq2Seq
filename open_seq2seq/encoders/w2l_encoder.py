@@ -121,7 +121,6 @@ class Wave2LetterEncoder(Encoder):
 
     # ----- Convolutional layers ---------------------------------------------
     convnet_layers = self.params['convnet_layers']
-
     for idx_convnet in range(len(convnet_layers)):
       layer_type = convnet_layers[idx_convnet]['type']
       layer_repeat = convnet_layers[idx_convnet]['repeat']
@@ -132,7 +131,8 @@ class Wave2LetterEncoder(Encoder):
       dropout_keep = convnet_layers[idx_convnet].get(
           'dropout_keep_prob', dropout_keep_prob) if training else 1.0
 
-      if residual and (layer_repeat>1):
+      block_residial = residual and (layer_repeat>1) and (strides[0]==1)
+      if block_residial:
         res_out = conv_block(
           layer_type=layer_type,
           name="res{}".format(idx_convnet + 1),
@@ -147,13 +147,13 @@ class Wave2LetterEncoder(Encoder):
           data_format=data_format,
           **normalization_params
         )
+
       for idx_layer in range(layer_repeat):
-        if residual and (layer_repeat>1) and (idx_layer==layer_repeat):
+        if block_residial and (idx_layer==layer_repeat):
           activation_fn=None
         else:
           activation_fn=self.params['activation_fn']
-
-        conv_feats = conv_block(
+          conv_feats = conv_block(
             layer_type=layer_type,
             name="conv{}{}".format(
                 idx_convnet + 1, idx_layer + 1),
@@ -169,8 +169,12 @@ class Wave2LetterEncoder(Encoder):
             **normalization_params
         )
         conv_feats = tf.nn.dropout(x=conv_feats, keep_prob=dropout_keep)
+        if padding == "VALID":
+          src_length = (src_length - kernel_size[0]) // strides[0] + 1
+        else:
+          src_length = (src_length + strides[0] - 1) // strides[0]
 
-      if residual and (layer_repeat>1):
+      if block_residial:
         conv_feats= tf.add(conv_feats, res_out)
         if self.params['activation_fn']!=None:
           conv_feats = self.params['activation_fn'](conv_feats)
@@ -179,7 +183,6 @@ class Wave2LetterEncoder(Encoder):
 
     if data_format == 'channels_first':
       outputs = tf.transpose(outputs, [0, 2, 1])
-
     return {
         'outputs': outputs,
         'src_length': src_length,
