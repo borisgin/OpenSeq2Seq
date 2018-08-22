@@ -133,9 +133,9 @@ train_params = {
         "num_audio_features": 64,
         "input_type": "logfbank",
         "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
-        "augmentation": {'time_stretch_ratio': 0.03,
-                     'noise_level_min': -90,
-                     'noise_level_max': -70},
+        # "augmentation": {'time_stretch_ratio': 0.03,
+        #              'noise_level_min': -90,
+        #              'noise_level_max': -70},
         # "dataset_files": [
         #     "/raid/speech/librispeech/librivox-train-clean-100.csv",
         #     "/raid/speech/librispeech/librivox-train-clean-360.csv",
