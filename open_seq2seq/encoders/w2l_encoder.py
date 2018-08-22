@@ -131,8 +131,8 @@ class Wave2LetterEncoder(Encoder):
       dropout_keep = convnet_layers[idx_convnet].get(
           'dropout_keep_prob', dropout_keep_prob) if training else 1.0
 
-      block_residial = residual and (layer_repeat>1) and (strides[0]==1)
-      if block_residial:
+      block_residual = residual and (layer_repeat>1) and (strides[0]==1)
+      if block_residual:
         res_out = conv_block(
           layer_type=layer_type,
           name="res{}".format(idx_convnet + 1),
@@ -149,11 +149,10 @@ class Wave2LetterEncoder(Encoder):
         )
 
       for idx_layer in range(layer_repeat):
-        if block_residial and (idx_layer==layer_repeat):
+        if block_residual and (idx_layer==(layer_repeat-1)):
           activation_fn=None
         else:
           activation_fn=self.params['activation_fn']
-
         conv_feats = conv_block(
             layer_type=layer_type,
             name="conv{}{}".format(
@@ -171,17 +170,17 @@ class Wave2LetterEncoder(Encoder):
         )
         conv_feats = tf.nn.dropout(x=conv_feats, keep_prob=dropout_keep)
         if padding == "VALID":
-          src_length = (src_length - kernel_size[0]) // strides[0] + 1
+          src_length = (src_length - kernel_size[0])//strides[0] + 1
         else:
-          src_length = (src_length + strides[0] - 1) // strides[0]
+          src_length = (src_length + strides[0] - 1)//strides[0]
 
-      if block_residial:
+      if block_residual:
         conv_feats= tf.add(conv_feats, res_out)
-        if self.params['activation_fn']!=None:
-          conv_feats = self.params['activation_fn'](conv_feats)
+        activation_fn = self.params['activation_fn']
+        if activation_fn!=None:
+          conv_feats = activation_fn(conv_feats)
 
     outputs = conv_feats
-
     if data_format == 'channels_first':
       outputs = tf.transpose(outputs, [0, 2, 1])
     return {
