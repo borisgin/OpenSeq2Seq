@@ -9,15 +9,16 @@ from open_seq2seq.optimizers.lr_policies import poly_decay
 
 
 base_model = Speech2Text
+data_prefix = "data/" # "/raid/speech/" #
 
 base_params = {
     "random_seed": 0,
-    "use_horovod":  True, # False, #
+    "use_horovod":  True, #
     #"max_steps" : 50,
     "num_epochs": 100, #50,
 
-    "num_gpus": 8, #1, #
-    "batch_size_per_gpu": 64,
+    "num_gpus":8, #
+    "batch_size_per_gpu": 32,
     "iter_size": 1,
 
     "save_summaries_steps": 1100,
@@ -37,7 +38,7 @@ base_params = {
         "power": 2.0,
     },
     "larc_params": {
-        "larc_eta": 0.001,
+        "larc_eta": 0.002,
     },
     "regularizer": tf.contrib.layers.l2_regularizer,
     "regularizer_params": {
@@ -62,39 +63,45 @@ base_params = {
                 "type": "conv1d", "repeat": 3,
                 "kernel_size": [11], "stride": [1],
                 "num_channels": 256, "padding": "SAME",
+                # "dropout_keep_prob": 0.8,
             },
             {
                 "type": "conv1d", "repeat": 4,
                 "kernel_size": [13], "stride": [1],
-                "num_channels": 320, "padding": "SAME",
+                "num_channels": 384, "padding": "SAME",
+                # "dropout_keep_prob": 0.8,
             },
             {
                 "type": "conv1d", "repeat": 4,
                 "kernel_size": [17], "stride": [1],
-                "num_channels": 384, "padding": "SAME",
+                "num_channels": 512, "padding": "SAME",
+                # "dropout_keep_prob": 0.8,
             },
             {
                 "type": "conv1d", "repeat": 4,
                 "kernel_size": [21], "stride": [1],
-                "num_channels": 512, "padding": "SAME",
+                "num_channels": 640, "padding": "SAME",
+                # "dropout_keep_prob": 0.7,
             },
             {
                 "type": "conv1d", "repeat": 4,
                 "kernel_size": [25], "stride": [1],
-                "num_channels": 640, "padding": "SAME",
+                "num_channels": 768, "padding": "SAME",
+                # "dropout_keep_prob": 0.7,
             },
             {
                 "type": "conv1d", "repeat": 1,
                 "kernel_size": [29], "stride": [1],
-                "num_channels":768 , "padding": "SAME",
+                "num_channels": 896, "padding": "SAME",
+                # "dropout_keep_prob": 0.6,
             },
             {
                 "type": "conv1d", "repeat": 1,
                 "kernel_size": [1], "stride": [1],
-                "num_channels": 1024, "padding": "SAME",
+                "num_channels": 2048, "padding": "SAME",
+                "dropout_keep_prob": 0.6,
             },
         ],
-
         "dropout_keep_prob": 0.6,
         "initializer": tf.contrib.layers.xavier_initializer,
         "initializer_params": {
@@ -111,7 +118,6 @@ base_params = {
     "decoder_params": {
         "initializer": tf.contrib.layers.xavier_initializer,
         "use_language_model": False,
-
         # params for decoding the sequence with language model
         "beam_width": 512,
         "lm_weight": 2.0,
@@ -136,15 +142,10 @@ train_params = {
         # "augmentation": {'time_stretch_ratio': 0.03,
         #              'noise_level_min': -90,
         #              'noise_level_max': -70},
-        # "dataset_files": [
-        #     "/raid/speech/librispeech/librivox-train-clean-100.csv",
-        #     "/raid/speech/librispeech/librivox-train-clean-360.csv",
-        #     "/raid/speech/librispeech/librivox-train-other-500.csv",
-        # ],
         "dataset_files": [
-            "data/librispeech/librivox-train-clean-100.csv",
-            "data/librispeech/librivox-train-clean-360.csv",
-            "data/librispeech/librivox-train-other-500.csv",
+            data_prefix+"librispeech/librivox-train-clean-100.csv",
+            data_prefix+"librispeech/librivox-train-clean-360.csv",
+            data_prefix+"librispeech/librivox-train-other-500.csv",
         ],
         "max_duration": 16.7,
         "shuffle": True,
@@ -157,11 +158,8 @@ eval_params = {
         "num_audio_features": 64,
         "input_type": "logfbank",
         "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
-        # "dataset_files": [
-        #     "/raid/speech/librispeech/librivox-dev-clean.csv",
-        # ],
         "dataset_files": [
-            "data/librispeech/librivox-dev-clean.csv",
+            data_prefix+"librispeech/librivox-dev-clean.csv",
         ],
         "shuffle": False,
     },
@@ -173,11 +171,8 @@ infer_params = {
         "num_audio_features": 64,
         "input_type": "logfbank",
         "vocab_file": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
-        # "dataset_files": [
-        #     "/raid/speech/librispeech/librivox-test-clean.csv",
-        # ],
         "dataset_files": [
-            "data/librispeech/librivox-test-clean.csv",
+            data_prefix+"librispeech/librivox-test-clean.csv",
         ],
         "shuffle": False,
     },
