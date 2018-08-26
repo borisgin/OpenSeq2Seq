@@ -9,7 +9,7 @@ from open_seq2seq.optimizers.lr_policies import poly_decay
 
 
 base_model = Speech2Text
-data_prefix =  "/raid/speech/" #"data/" #
+data_prefix =  "data/" # "/raid/speech/" #
 
 base_params = {
     "random_seed": 0,
