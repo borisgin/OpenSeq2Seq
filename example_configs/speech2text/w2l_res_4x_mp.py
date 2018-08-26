@@ -9,15 +9,15 @@ from open_seq2seq.optimizers.lr_policies import poly_decay
 
 
 base_model = Speech2Text
-data_prefix = "data/" # "/raid/speech/" #
+data_prefix =  "/raid/speech/" #"data/" #
 
 base_params = {
     "random_seed": 0,
-    "use_horovod":  True, #
+    "use_horovod":  False, #
     #"max_steps" : 50,
     "num_epochs": 100, #50,
 
-    "num_gpus":8, #
+    "num_gpus":2, #8, #
     "batch_size_per_gpu": 32,
     "iter_size": 1,
 
@@ -54,13 +54,13 @@ base_params = {
     "encoder": Wave2LetterEncoder,
     "encoder_params": {
         "convnet_layers": [
+            # {
+            #     "type": "conv1d", "repeat": 1,
+            #     "kernel_size": [11], "stride": [2],
+            #     "num_channels": 128, "padding": "SAME",
+            # },
             {
-                "type": "conv1d", "repeat": 1,
-                "kernel_size": [11], "stride": [2],
-                "num_channels": 128, "padding": "SAME",
-            },
-            {
-                "type": "conv1d", "repeat": 3,
+                "type": "conv1d", "repeat": 4,
                 "kernel_size": [11], "stride": [1],
                 "num_channels": 256, "padding": "SAME",
                 # "dropout_keep_prob": 0.8,
@@ -92,14 +92,14 @@ base_params = {
             {
                 "type": "conv1d", "repeat": 1,
                 "kernel_size": [29], "stride": [1],
-                "num_channels": 896, "padding": "SAME",
+                "num_channels": 1024, "padding": "SAME",
                 # "dropout_keep_prob": 0.6,
             },
             {
                 "type": "conv1d", "repeat": 1,
                 "kernel_size": [1], "stride": [1],
                 "num_channels": 2048, "padding": "SAME",
-                "dropout_keep_prob": 0.6,
+                # "dropout_keep_prob": 0.6,
             },
         ],
         "dropout_keep_prob": 0.6,
