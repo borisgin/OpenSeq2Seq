@@ -17,7 +17,7 @@ base_params = {
     #"max_steps" : 50,
     "num_epochs": 100, #50,
 
-    "num_gpus":2, #8, #
+    "num_gpus":8, #8, #
     "batch_size_per_gpu": 32,
     "iter_size": 1,
 
@@ -98,7 +98,7 @@ base_params = {
             {
                 "type": "conv1d", "repeat": 1,
                 "kernel_size": [1], "stride": [1],
-                "num_channels": 2048, "padding": "SAME",
+                "num_channels": 1280, "padding": "SAME",
                 # "dropout_keep_prob": 0.6,
             },
         ],
