@@ -23,7 +23,7 @@ regularizer = None #tf.contrib.layers.l2_regularizer #  #
 regularizer_params = {'scale': 0.001}
 
 norm_params= {
-  "type": "layernorm_L1" , #"batch_norm", # "layernorm_L2" , #
+  "type": "batch_norm", # "layernorm_L2" , #"layernorm_L1" , #
   "momentum":0.95,
   "epsilon": 0.000001,
   "center_scale":True,
