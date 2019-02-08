@@ -42,17 +42,17 @@ data_root = "/data/wmt16-ende-sp/"
 base_params = {
   "use_horovod": True,
   "num_gpus": 1, #8, # when using Horovod we set number of workers with params to mpirun
-  "batch_size_per_gpu": 128,  # this size is in sentence pairs, reduce it if you get OOM
-  "max_steps":  300000,
+  "batch_size_per_gpu": 64,  # this size is in sentence pairs, reduce it if you get OOM
+  "max_steps":  600000,
   "save_summaries_steps": 100,
   "print_loss_steps": 100,
   "print_samples_steps": 1000,
   "eval_steps": 4001,
   "save_checkpoint_steps": 299998,
   "logdir": "tr-bn-fp32",
-  # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
-  "dtype": "mixed",
-  "loss_scaling": "Backoff",
+  "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
+  # "dtype": "mixed",
+  # "loss_scaling": "Backoff",
 
   # "summaries": ['learning_rate', 'variables', 'gradients', 'larc_summaries',
   #               'variable_norm', 'gradient_norm', 'global_gradient_norm'],
@@ -81,9 +81,9 @@ base_params = {
   #   "power": 2,
   # },
 
-  "larc_params": {
-    "larc_eta": 0.001,
-  },
+  # "larc_params": {
+  #   "larc_eta": 0.001,
+  # },
 
   "encoder": TransformerEncoder,
   "encoder_params": {
