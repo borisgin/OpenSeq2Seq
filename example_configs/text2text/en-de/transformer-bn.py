@@ -23,9 +23,9 @@ regularizer = None #tf.contrib.layers.l2_regularizer #  #
 regularizer_params = {'scale': 0.001}
 
 norm_params= {
-  "type": "batch_norm", # "layernorm_L2" , #"layernorm_L1" , #
+  "type": "layernorm_L1" , #"batch_norm", # "layernorm_L2" , #
   "momentum":0.95,
-  "epsilon": 0.00001,
+  "epsilon": 0.000001,
   "center_scale":True,
   "regularizer":regularizer,
   "regularizer_params": regularizer_params
@@ -50,9 +50,9 @@ base_params = {
   "eval_steps": 4001,
   "save_checkpoint_steps": 299998,
   "logdir": "tr-bn-fp32",
-  "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
-  # "dtype": "mixed",
-  # "loss_scaling": "Backoff",
+  # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
+  "dtype": "mixed",
+  "loss_scaling": "Backoff",
 
   # "summaries": ['learning_rate', 'variables', 'gradients', 'larc_summaries',
   #               'variable_norm', 'gradient_norm', 'global_gradient_norm'],
@@ -81,9 +81,9 @@ base_params = {
   #   "power": 2,
   # },
 
-  # "larc_params": {
-  #   "larc_eta": 0.001,
-  # },
+  "larc_params": {
+    "larc_eta": 0.001,
+  },
 
   "encoder": TransformerEncoder,
   "encoder_params": {
