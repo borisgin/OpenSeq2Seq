@@ -46,7 +46,7 @@ base_params = {
   "max_steps":  300000,
   "save_summaries_steps": 100,
   "print_loss_steps": 100,
-  "print_samples_steps": 100,
+  "print_samples_steps": 1000,
   "eval_steps": 4001,
   "save_checkpoint_steps": 299998,
   "logdir": "tr-bn-fp16",
