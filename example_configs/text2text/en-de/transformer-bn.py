@@ -20,7 +20,7 @@ d_model = 1024
 num_layers = 6
 
 regularizer = tf.contrib.layers.l2_regularizer #  None #
-regularizer_params = {'scale': 0.0005}
+regularizer_params = {'scale': 0.0001}
 
 norm_params= {
   "type":  "layernorm_L2" , #"layernorm_L1" , #"batch_norm", #
