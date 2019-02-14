@@ -77,7 +77,7 @@ base_params = {
 
   "lr_policy": poly_decay,  # fixed_lr,
   "lr_policy_params": {
-    "learning_rate": 0.005, #  0,2 for 4 GPU
+    "learning_rate": 0.01, #  0,2 for 4 GPU
     "power": 2.,
   },
 
