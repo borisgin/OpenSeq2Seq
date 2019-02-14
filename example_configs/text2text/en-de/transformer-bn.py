@@ -19,7 +19,7 @@ base_model = Text2Text
 d_model = 1024
 num_layers = 6
 
-regularizer = tf.contrib.layers.l2_regularizer #  None #
+regularizer = tf.contrib.layers.l2_regularizer #None #
 regularizer_params = {'scale': 0.0001}
 
 norm_params= {
@@ -48,7 +48,7 @@ base_params = {
   "print_samples_steps": 1000,
   "eval_steps": 4001,
   "save_checkpoint_steps": 299998,
-  "logdir": "tr-ln2r-fp16",
+  "logdir": "tr-ln2r-adam_lr0.005p2",
   # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
   "dtype": "mixed",
   "loss_scaling": "Backoff",
@@ -61,28 +61,29 @@ base_params = {
   "optimizer_params": {
     "beta1": 0.9,
     "beta2": 0.997,
-    "epsilon": 1e-09,
+    "epsilon": 1.e-4, #1e-09,
   },
-  "lr_policy": transformer_policy,
-  "lr_policy_params": {
-    "learning_rate": 2.0,
-    "warmup_steps": 8000,
-    "d_model": d_model,
-  },
+  # "lr_policy": transformer_policy,
+  # "lr_policy_params": {
+  #   "learning_rate": 2.0,
+  #   "warmup_steps": 8000,
+  #   "d_model": d_model,
+  # },
 
   # "optimizer": "Momentum",
   # "optimizer_params": {
   #   "momentum": 0.95,
   # },
-  # "lr_policy": poly_decay,  # fixed_lr,
-  # "lr_policy_params": {
-  #   "learning_rate": 0.2, #  0,2 for 4 GPU
-  #   "power": 2,
-  # },
 
-  "larc_params": {
-    "larc_eta": 0.0005,
+  "lr_policy": poly_decay,  # fixed_lr,
+  "lr_policy_params": {
+    "learning_rate": 0.005, #  0,2 for 4 GPU
+    "power": 2.,
   },
+
+  # "larc_params": {
+  #   "larc_eta": 0.0005,
+  # },
 
   "encoder": TransformerEncoder,
   "encoder_params": {
