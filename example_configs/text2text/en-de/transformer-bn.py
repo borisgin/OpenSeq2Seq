@@ -48,7 +48,7 @@ base_params = {
   "print_samples_steps": 1000,
   "eval_steps": 4001,
   "save_checkpoint_steps": 299998,
-  "logdir": "tr-ln2r-adam_lr0.005p2",
+  "logdir": "tr-ln2r-adam_lr0.0001p2",
   # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
   "dtype": "mixed",
   "loss_scaling": "Backoff",
@@ -77,7 +77,7 @@ base_params = {
 
   "lr_policy": poly_decay,  # fixed_lr,
   "lr_policy_params": {
-    "learning_rate": 0.01, #  0,2 for 4 GPU
+    "learning_rate": 0.0001, #  0,2 for 4 GPU
     "power": 2.,
   },
 
