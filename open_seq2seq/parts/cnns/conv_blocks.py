@@ -16,28 +16,46 @@ layers_dict = {
 
 
 def conv_actv(layer_type, name, inputs, filters, kernel_size, activation_fn,
-              strides, padding, regularizer, training, data_format, dilation=1):
+              strides, padding, regularizer, training, data_format, dilation=1,
+              compression=1):
   """Helper function that applies convolution and activation.
     Args:
       layer_type: the following types are supported
         'conv1d', 'conv2d'
   """
-  layer = layers_dict[layer_type]
+  if compression!=1:
+    assert filters % compression == 0, "compressed_conv: filters % compression != 0"
 
-  conv = layer(
-      name="{}".format(name),
-      inputs=inputs,
+  layer = layers_dict[layer_type]
+  ch_out = filters / compression
+  output = layer(
+        name="{}".format(name),
+        inputs=inputs,
+        filters=ch_out,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        dilation_rate=dilation,
+        kernel_regularizer=regularizer,
+        use_bias=False,
+        data_format=data_format,
+    )
+  if compression!=1:
+    if activation_fn is not None:
+      output = activation_fn(output)
+    output = layer(
+      name="{}_1x1".format(name),
+      inputs=output,
       filters=filters,
-      kernel_size=kernel_size,
-      strides=strides,
+      kernel_size=1,
+      strides=1,
       padding=padding,
-      dilation_rate=dilation,
+      dilation_rate=1,
       kernel_regularizer=regularizer,
       use_bias=False,
       data_format=data_format,
   )
 
-  output = conv
   if activation_fn is not None:
     output = activation_fn(output)
   return output
@@ -46,7 +64,11 @@ def conv_bn_res_bn_actv(layer_type, name, inputs, res_inputs, filters,
                         kernel_size, activation_fn, strides, padding,
                         regularizer, training, data_format, bn_momentum,
                         bn_epsilon, dilation=1,
-                        drop_block_prob=0.0, drop_block=False):
+                        drop_block_prob=0.0, drop_block=False,
+                        compression=1):
+  if compression!=1:
+    assert filters % compression == 0, "compressed_conv: filters % compression != 0"
+
   layer = layers_dict[layer_type]
 
   if not isinstance(res_inputs, list):
@@ -83,21 +105,36 @@ def conv_bn_res_bn_actv(layer_type, name, inputs, res_inputs, filters,
     )
     if squeeze:
       res = tf.squeeze(res, axis=axis)
-
     res_aggregation += res
 
+  ch_out = filters / compression
   conv = layer(
-      name="{}".format(name),
-      inputs=inputs,
+        name="{}".format(name),
+        inputs=inputs,
+        filters=ch_out,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        dilation_rate=dilation,
+        kernel_regularizer=regularizer,
+        use_bias=False,
+        data_format=data_format,
+    )
+  if compression != 1:
+    if activation_fn is not None:
+      conv = activation_fn(conv)
+    conv = layer(
+      name="{}_1x1".format(name),
+      inputs=conv,
       filters=filters,
-      kernel_size=kernel_size,
-      strides=strides,
+      kernel_size=1,
+      strides=1,
       padding=padding,
-      dilation_rate=dilation,
+      dilation_rate=1,
       kernel_regularizer=regularizer,
       use_bias=False,
       data_format=data_format,
-  )
+    )
 
   # trick to make batchnorm work for mixed precision training.
   # To-Do check if batchnorm works smoothly for >4 dimensional tensors
@@ -138,18 +175,22 @@ def conv_bn_res_bn_actv(layer_type, name, inputs, res_inputs, filters,
 
 def conv_bn_actv(layer_type, name, inputs, filters, kernel_size, activation_fn,
                  strides, padding, regularizer, training, data_format,
-                 bn_momentum, bn_epsilon, dilation=1):
+                 bn_momentum, bn_epsilon, dilation=1,
+                 compression=1):
   """Helper function that applies convolution, batch norm and activation.
     Args:
       layer_type: the following types are supported
         'conv1d', 'conv2d'
   """
-  layer = layers_dict[layer_type]
+  if compression!=1:
+    assert filters % compression==0, "compressed_conv: {}".format(filters%compression)
 
+  layer = layers_dict[layer_type]
+  ch_out = filters / compression
   conv = layer(
       name="{}".format(name),
       inputs=inputs,
-      filters=filters,
+      filters=ch_out,
       kernel_size=kernel_size,
       strides=strides,
       padding=padding,
@@ -158,6 +199,21 @@ def conv_bn_actv(layer_type, name, inputs, filters, kernel_size, activation_fn,
       use_bias=False,
       data_format=data_format,
   )
+  if compression!=1:
+    if activation_fn is not None:
+      conv = activation_fn(conv)
+    conv = layer(
+      name="{}_1x1".format(name),
+      inputs=conv,
+      filters=filters,
+      kernel_size=1,
+      strides=1,
+      padding=padding,
+      dilation_rate=1,
+      kernel_regularizer=regularizer,
+      use_bias=False,
+      data_format=data_format,
+    )
 
   # trick to make batchnorm work for mixed precision training.
   # To-Do check if batchnorm works smoothly for >4 dimensional tensors

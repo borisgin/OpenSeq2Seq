@@ -179,7 +179,7 @@ class TDNNEncoder(Encoder):
           'dropout_keep_prob', dropout_keep_prob) if training else 1.0
       residual = convnet_layers[idx_convnet].get('residual', False)
       residual_dense = convnet_layers[idx_convnet].get('residual_dense', False)
-
+      compression=convnet_layers[idx_convnet].get('compression', 1)
 
       # For the first layer in the block, apply a mask
       if self.params.get("use_conv_mask", False):
@@ -232,6 +232,7 @@ class TDNNEncoder(Encoder):
               data_format=data_format,
               drop_block_prob=drop_block_prob,
               drop_block=(drop_block_index == idx_convnet),
+              compression=compression,
               **normalization_params
           )
         else:
@@ -249,6 +250,7 @@ class TDNNEncoder(Encoder):
               regularizer=regularizer,
               training=training,
               data_format=data_format,
+              compression=compression,
               **normalization_params
           )
 
