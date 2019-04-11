@@ -173,7 +173,7 @@ base_params = {
         # "trie_path": "language_model/trie.binary",
         # "alphabet_config_path": "open_seq2seq/test_utils/toy_speech_data/vocab.txt",
 
-        "infer_logits_to_pickle": True,
+#        "infer_logits_to_pickle": True,
     },
     "loss": CTCLoss,
     "loss_params": {},
@@ -189,7 +189,7 @@ base_params = {
         "sample_freq": 16000,
         "pad_to": 16,
         "dither": 1e-5,
-        "backend": "librosa"
+        "backend": "librosa"  #'psf', #
     },
 }
 
