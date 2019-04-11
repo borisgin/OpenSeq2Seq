@@ -43,14 +43,14 @@ base_params = {
         "min_lr": 1e-5,
         "power": 2.0,
     },
-    "larc_params": {
-        "larc_eta": 0.001,
-    },
+    # "larc_params": {
+    #     "larc_eta": 0.001,
+    # },
 
     "dtype": "mixed",
-    "loss_scaling": "Backoff",
+    "loss_scaling": 1000., #"Backoff",
 
-    "summaries": ['learning_rate', 'variables', 'gradients', 'larc_summaries',
+    "summaries": ['learning_rate', 'variables', 'gradients', #'larc_summaries',
                   'variable_norm', 'gradient_norm', 'global_gradient_norm'],
 
     "encoder": TDNNEncoder,
