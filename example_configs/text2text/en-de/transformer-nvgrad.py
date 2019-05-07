@@ -47,10 +47,10 @@ base_params = {
   "batch_size_per_gpu": 128, #64,  # this size is in sentence pairs, reduce it if you get OOM
   "num_epochs": 100,
   #"max_steps":  300000, #1000,
-  "save_summaries_steps": 100,
+  "save_summaries_steps": 10000,
   "print_loss_steps": 100,
   "print_samples_steps": 10000,
-  "eval_steps": 10000,
+  "eval_steps": 50000,
   "save_checkpoint_steps": 99999,
   "logdir": "tr-nvgrad2_0.90.99-b128-lr0.1-fp16",
   # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
@@ -148,10 +148,10 @@ train_params = {
     "target_file": data_root + "train.clean.de.shuffled.BPE_common.32K.tok",
     "delimiter": " ",
     "shuffle": True,
-    "shuffle_buffer_size": 25000,
+    "shuffle_buffer_size": 500000,
     "repeat": True,
     "map_parallel_calls": 16,
-    "max_length": 56,
+    "max_length": 64,
   },
 }
 
