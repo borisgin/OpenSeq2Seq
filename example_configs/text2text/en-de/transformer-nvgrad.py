@@ -57,8 +57,8 @@ base_params = {
   "dtype": "mixed",
   "loss_scaling": "Backoff", # 100., #
 
-  # "summaries": ['learning_rate', 'variables', 'gradients', 'larc_summaries',
-  #               'variable_norm', 'gradient_norm', 'global_gradient_norm'],
+  "summaries": ['learning_rate', 'variables', 'gradients', # 'larc_summaries',
+                 'variable_norm', 'gradient_norm', 'global_gradient_norm'],
   "iter_size": 1,
 
   #-------------------------------------------------------
