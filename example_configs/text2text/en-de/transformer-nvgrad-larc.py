@@ -94,7 +94,7 @@ base_params = {
   },
 
   "larc_params": {
-    "larc_eta": 0.001,
+    "larc_eta": 0.0002,
   },
 
   "encoder": TransformerEncoder,
