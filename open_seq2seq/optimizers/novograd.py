@@ -57,6 +57,7 @@ class NovoGrad(MomentumOptimizer):
                beta2=0.98,
                epsilon=1e-8,
                weight_decay=0.0,
+               eta=0.0,
                grad_averaging=False,
                use_locking=False,
                name='NovoGrad'):
@@ -83,6 +84,8 @@ class NovoGrad(MomentumOptimizer):
     self._wd  = weight_decay
     self._grad_averaging  = grad_averaging
     self._grads_ema = None
+    self._clip_eta = eta
+
 
     # Tensor versions, converted to tensors in apply_gradients
     # self._beta1_t = None
@@ -118,7 +121,16 @@ class NovoGrad(MomentumOptimizer):
       # Momentum --> SAG
       if self._grad_averaging:
         grad *= (1.-self._beta1)
+
+      # LARC: rate  clipping
+      if self._clip_eta > 0. :
+        v_norm = tf.norm(tensor=tf.cast(var, tf.float32), ord=2)
+        g_norm = tf.norm(tensor=tf.cast(grad, tf.float32), ord=2)
+        scale= tf.minimum(self._clip_eta * v_norm / (self._learning_rate * (g_norm + self._epsilon)), 1.)
+        grad = tf.cond(scale < 1., lambda: tf.multiply(grad,scale), lambda: grad)
+
       grads_and_vars[i] = (grad, var)
+
 
     # call Momentum to do update
     return super(NovoGrad, self).apply_gradients(

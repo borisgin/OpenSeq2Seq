@@ -52,7 +52,7 @@ base_params = {
   "print_samples_steps": 10000,
   "eval_steps": 50000,
   "save_checkpoint_steps": 99999,
-  "logdir": "tr-nvgrad2_0.90.99-b128-lr0.1-fp16",
+  "logdir": "logs/tr-nvlarc/lr0.1_eta0.0002",
   # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
   "dtype": "mixed",
   "loss_scaling": "Backoff", # 100., #
@@ -86,16 +86,17 @@ base_params = {
     "epsilon":  1e-08,
     "weight_decay": 0.001,
     "grad_averaging": False,
+    "eta": 0.0002,
   },
   "lr_policy": poly_decay,  # fixed_lr,
   "lr_policy_params": {
-    "learning_rate": 0.01, # 0.1
+    "learning_rate": 0.1, # 0.1
     "power": 2,
   },
 
-  "larc_params": {
-    "larc_eta": 0.0002,
-  },
+  # "larc_params": {
+  #   "larc_eta": 0.0002,
+  # },
 
   "encoder": TransformerEncoder,
   "encoder_params": {
