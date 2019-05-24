@@ -34,7 +34,7 @@ norm_params= {
 }
 
 attention_dropout = 0.1
-dropout = 0.0 #0.3
+dropout = 0.1 #0.3
 
 # REPLACE THIS TO THE PATH WITH YOUR WMT DATA
 #data_root = "[REPLACE THIS TO THE PATH WITH YOUR WMT DATA]"
@@ -50,7 +50,7 @@ base_params = {
   "save_summaries_steps": 10000,
   "print_loss_steps": 100,
   "print_samples_steps": 10000,
-  "eval_steps": 50000,
+  "eval_steps": 100000,
   "save_checkpoint_steps": 99999,
   "logdir": "logs/tr-nvlarc/lr0.1_eta0.0002",
   # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
