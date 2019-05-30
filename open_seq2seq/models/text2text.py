@@ -114,7 +114,7 @@ class Text2Text(EncoderDecoderModel):
       for input_strings, output_strings in results_per_batch:
         for input_string, output_string in zip(input_strings, output_strings):
           fout.write(output_string + "\n")
-          if step % 200 == 0:
+          if step % 2000 == 0:
             deco_print("Input sequence:  {}".format(input_string))
             deco_print("Output sequence: {}".format(output_string))
             deco_print("")
@@ -129,31 +129,31 @@ class Text2Text(EncoderDecoderModel):
     len_x_sample = len_x[0]
     y_sample = y[0]
     len_y_sample = len_y[0]
-
-    deco_print(
-        "Train Source[0]:     " + array_to_string(
-            x_sample[:len_x_sample],
-            vocab=self.get_data_layer().params['source_idx2seq'],
-            delim=self.get_data_layer().params["delimiter"],
-        ),
-        offset=4,
-    )
-    deco_print(
-        "Train Target[0]:     " + array_to_string(
-            y_sample[:len_y_sample],
-            vocab=self.get_data_layer().params['target_idx2seq'],
-            delim=self.get_data_layer().params["delimiter"],
-        ),
-        offset=4,
-    )
-    deco_print(
-        "Train Prediction[0]: " + array_to_string(
-            samples[0, :],
-            vocab=self.get_data_layer().params['target_idx2seq'],
-            delim=self.get_data_layer().params["delimiter"],
-        ),
-        offset=4,
-    )
+    if self.params.get('eval_print', False):
+      deco_print(
+          "Train Source[0]:     " + array_to_string(
+              x_sample[:len_x_sample],
+              vocab=self.get_data_layer().params['source_idx2seq'],
+              delim=self.get_data_layer().params["delimiter"],
+          ),
+          offset=4,
+      )
+      deco_print(
+          "Train Target[0]:     " + array_to_string(
+              y_sample[:len_y_sample],
+              vocab=self.get_data_layer().params['target_idx2seq'],
+              delim=self.get_data_layer().params["delimiter"],
+          ),
+          offset=4,
+      )
+      deco_print(
+          "Train Prediction[0]: " + array_to_string(
+              samples[0, :],
+              vocab=self.get_data_layer().params['target_idx2seq'],
+              delim=self.get_data_layer().params["delimiter"],
+          ),
+          offset=4,
+      )
     return {}
 
   def evaluate(self, input_values, output_values):
@@ -164,32 +164,34 @@ class Text2Text(EncoderDecoderModel):
     len_x_sample = elen_x[0]
     y_sample = ey[0]
     len_y_sample = elen_y[0]
-
-    deco_print(
-        "*****EVAL Source[0]:     " + array_to_string(
-            x_sample[:len_x_sample],
-            vocab=self.get_data_layer().params['source_idx2seq'],
-            delim=self.get_data_layer().params["delimiter"],
-        ),
-        offset=4,
-    )
-    deco_print(
-        "*****EVAL Target[0]:     " + array_to_string(
-            y_sample[:len_y_sample],
-            vocab=self.get_data_layer().params['target_idx2seq'],
-            delim=self.get_data_layer().params["delimiter"],
-        ),
-        offset=4,
-    )
     samples = output_values[0]
-    deco_print(
-        "*****EVAL Prediction[0]: " + array_to_string(
-            samples[0, :],
-            vocab=self.get_data_layer().params['target_idx2seq'],
-            delim=self.get_data_layer().params["delimiter"],
-        ),
-        offset=4,
-    )
+
+    if self.params.get('eval_print', False):
+      deco_print(
+          "*****EVAL Source[0]:     " + array_to_string(
+              x_sample[:len_x_sample],
+              vocab=self.get_data_layer().params['source_idx2seq'],
+              delim=self.get_data_layer().params["delimiter"],
+          ),
+          offset=4,
+      )
+      deco_print(
+          "*****EVAL Target[0]:     " + array_to_string(
+              y_sample[:len_y_sample],
+              vocab=self.get_data_layer().params['target_idx2seq'],
+              delim=self.get_data_layer().params["delimiter"],
+          ),
+          offset=4,
+      )
+      deco_print(
+          "*****EVAL Prediction[0]: " + array_to_string(
+              samples[0, :],
+              vocab=self.get_data_layer().params['target_idx2seq'],
+              delim=self.get_data_layer().params["delimiter"],
+          ),
+          offset=4,
+      )
+
     preds, targets = [], []
 
     if self.params.get('eval_using_bleu', True):

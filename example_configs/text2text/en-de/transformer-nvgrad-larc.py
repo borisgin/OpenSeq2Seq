@@ -49,7 +49,7 @@ base_params = {
   #"max_steps":  300000, #1000,
   "save_summaries_steps": 10000,
   "print_loss_steps": 100,
-  "print_samples_steps": 10000,
+  "print_samples_steps": 100000,
   "eval_steps": 100000,
   "save_checkpoint_steps": 99999,
   "logdir": "logs/tr-nvlarc/lr0.1_eta0.0002",
