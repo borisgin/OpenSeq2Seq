@@ -33,8 +33,8 @@ norm_params= {
   # "regularizer_params": regularizer_params
 }
 
-attention_dropout = 0.1
-dropout = 0.1 #0.3
+attention_dropout = 0. #0.1
+dropout = 0. #0.3
 
 # REPLACE THIS TO THE PATH WITH YOUR WMT DATA
 #data_root = "[REPLACE THIS TO THE PATH WITH YOUR WMT DATA]"
