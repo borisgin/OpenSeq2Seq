@@ -56,6 +56,10 @@ base_params = {
   # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
   "dtype": "mixed",
   "loss_scaling": "Backoff", # 100., #
+  'loss_scaling_params': {
+    'scale_min': 1.0,
+    'scale_max': 16.0,
+  },
 
   "summaries": ['learning_rate', 'variables', 'gradients', # 'larc_summaries',
                  'variable_norm', 'gradient_norm', 'global_gradient_norm'],
