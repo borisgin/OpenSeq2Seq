@@ -58,7 +58,8 @@ base_params = {
   "loss_scaling": "Backoff", # 100., #
   'loss_scaling_params': {
     'scale_min': 1.0,
-    'scale_max': 16.0,
+    'scale_max': 8000.0,
+    'step_window': 200000,
    },
 
   "summaries": ['learning_rate', 'variables', 'gradients', # 'larc_summaries',

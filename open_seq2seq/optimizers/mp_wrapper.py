@@ -117,7 +117,12 @@ class MixedPrecisionOptimizerWrapper(tf.train.Optimizer):
       loss_scale_update_op = self._loss_scaler.update_op(grad_has_nans,
                                                          grad_amax)
       with tf.control_dependencies([loss_scale_update_op]):
-        return tf.cond(should_skip_update, tf.no_op, apply_ops_wrapper)
+        # return tf.cond(should_skip_update, tf.no_op, apply_ops_wrapper)
+        #BG
+        grads_and_vars=tf.cond(should_skip_update,
+                               _scale_grads(grads_and_vars, 0.0),
+                               tf.identity(grads_and_vars ))
+        return apply_ops_wrapper()
     else:
       return apply_ops_wrapper()
 
