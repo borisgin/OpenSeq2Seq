@@ -34,7 +34,7 @@ norm_params= {
 }
 
 attention_dropout = 0.1
-dropout = 0.3
+dropout = 0.1
 
 # REPLACE THIS TO THE PATH WITH YOUR WMT DATA
 #data_root = "[REPLACE THIS TO THE PATH WITH YOUR WMT DATA]"
@@ -56,6 +56,11 @@ base_params = {
   # "dtype": tf.float32, # to enable mixed precision, comment this line and uncomment two below lines
   "dtype": "mixed",
   "loss_scaling": "Backoff", # 100., #
+  "loss_scaling_params": {
+    'scale_min': 1.0,
+    'scale_max': 8000.0,
+    'step_window': 200000,
+   },
 
   "summaries": ['learning_rate', 'variables', 'gradients', # 'larc_summaries',
                  'variable_norm', 'gradient_norm', 'global_gradient_norm'],
