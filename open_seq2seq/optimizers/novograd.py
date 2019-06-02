@@ -124,7 +124,7 @@ class NovoGrad(MomentumOptimizer):
 
       # LARC: rate  clipping
       if self._clip_eta > 0. :
-        print("NovoGrad eta=",self._clip_eta)
+        # print("NovoGrad eta=",self._clip_eta)
         # v_norm = tf.norm(tensor=tf.cast(var, tf.float32), ord=2)
         # g_norm = tf.norm(tensor=tf.cast(grad, tf.float32), ord=2)
         v_norm = tf.norm(var, ord=2)
