@@ -39,7 +39,8 @@ class AutomaticLossScaler(object):
         else:
           x = grad
 
-        has_nan_ops.append(tf.reduce_any(tf.is_nan(x)))
+        # has_nan_ops.append(tf.reduce_any(tf.is_nan(x)))
+        has_nan_ops.append(tf.math.logical_not(tf.reduce_all(tf.isfinte(x))))
         amax_ops.append(tf.reduce_max(tf.abs(x)))
 
     has_nan = tf.reduce_any(has_nan_ops)
@@ -62,7 +63,7 @@ class BackoffScaler(object):
         },
     )
     self.scale_min = params.get('scale_min', 1.0)
-    self.scale_max = params.get('scale_max', 2.**24)
+    self.scale_max = params.get('scale_max', 2.**14)
     self.step_factor = params.get('step_factor', 2.0)
     self.step_window = params.get('step_window', 2000)
 
