@@ -39,8 +39,8 @@ class AutomaticLossScaler(object):
         else:
           x = grad
 
-        has_nan_ops.append(tf.reduce_any(tf.is_nan(x)))
-        #has_nan_ops.append(tf.math.logical_not(tf.reduce_all(tf.math.is_finte(x))))
+        #has_nan_ops.append(tf.reduce_any(tf.is_nan(x)))
+        has_nan_ops.append(tf.math.logical_not(tf.reduce_all(tf.is_finite(x))))
         amax_ops.append(tf.reduce_max(tf.abs(x)))
 
     has_nan = tf.reduce_any(has_nan_ops)
