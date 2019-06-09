@@ -28,7 +28,7 @@ base_params = {
   "print_samples_steps": 10000,
   "eval_steps": 5000,
   "save_checkpoint_steps": 5000,
-  "logdir": "logs/rn50/nvgd_lr0.02_wd0.001",
+  "logdir": "logs/rn50/nvgd_luc_lr0.02_wd0.001",
 
   "optimizer": NovoGrad,
   "optimizer_params": {
@@ -36,13 +36,9 @@ base_params = {
     "beta2": 0.98,
     "epsilon": 1e-08,
     "weight_decay": 0.004,
-    "grad_averaging": False
+    "grad_averaging": False,
+    "eta": 0.001,
   },
-
-  "larc_params": {
-    "larc_eta": 0.001,
-  },
-
   "lr_policy": poly_decay,
   "lr_policy_params": {
     "learning_rate": 0.03,
