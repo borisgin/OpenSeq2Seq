@@ -43,6 +43,7 @@ base_params = {
   "lr_policy_params": {
     "learning_rate": 0.03,
     "power": 2,
+    "warmup_step": 0,
   },
 
   "initializer": tf.variance_scaling_initializer,
