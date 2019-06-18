@@ -39,12 +39,17 @@ base_params = {
     "grad_averaging": False
   },
 
-  "lr_policy": poly_decay,
+  "lr_policy": tf.train.cosine_decay,
   "lr_policy_params": {
     "learning_rate": 0.03,
-    "power": 2,
-    "warmup_steps": 0,
   },
+  
+  # "lr_policy": poly_decay,
+  # "lr_policy_params": {
+  #   "learning_rate": 0.03,
+  #   "power": 2,
+  #   "warmup_steps": 0,
+  # },
 
   "initializer": tf.variance_scaling_initializer,
 
