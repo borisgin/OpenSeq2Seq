@@ -4,7 +4,8 @@ from open_seq2seq.encoders import ResNetEncoder
 from open_seq2seq.decoders import FullyConnectedDecoder
 from open_seq2seq.losses import CrossEntropyLoss
 from open_seq2seq.data import ImagenetDataLayer
-from open_seq2seq.optimizers.lr_policies import piecewise_constant,  poly_decay
+from open_seq2seq.optimizers.lr_policies import piecewise_constant,  poly_decay,\
+  cosine_decay
 from open_seq2seq.optimizers.novograd  import NovoGrad
 
 import tensorflow as tf
@@ -40,14 +41,11 @@ base_params = {
   },
 
   # "lr_policy": poly_decay,
-  # "lr_policy_params": {
-  #   "learning_rate": 0.03,
-  #   "power": 2,
-  #   "warmup_steps": 0,
-  # },
-  "lr_policy": tf.train.cosine_decay,
+  "lr_policy": cosine_decay,
   "lr_policy_params": {
     "learning_rate": 0.03,
+   # "power": 2, # poly_decay
+    "warmup_steps": 0,
   },
 
   "initializer": tf.variance_scaling_initializer,
